@@ -17,18 +17,18 @@ def parseXMLs():
     for entry in os.listdir(xmlDirectory):
         full_path = os.path.join(xmlDirectory, entry)
         if os.path.isfile(full_path):
-            print(f"File: {full_path}")
-            # Perform operations on the file
-            try:
-                tree = ET.parse(full_path)
-                root = tree.getroot()
-                parsedXMLs.append(root)
-            except FileNotFoundError:
-                print("Error: '" + full_path + "' not found.")
-                exit()
-            except ET.ParseError as e:
-                print(f"Error parsing XML: {e}")
-                exit()
+            if entry != '.gitignore':
+                # Perform operations on the file
+                try:
+                    tree = ET.parse(full_path)
+                    root = tree.getroot()
+                    parsedXMLs.append(root)
+                except FileNotFoundError:
+                    print("Error: '" + full_path + "' not found.")
+                    exit()
+                except ET.ParseError as e:
+                    print(f"Error parsing XML: {e}")
+                    exit()
     return parsedXMLs
     
     

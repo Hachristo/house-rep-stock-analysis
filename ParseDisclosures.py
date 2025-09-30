@@ -151,19 +151,20 @@ def parseDisclosure(txtFile):
     with open("./StockAssetsFD/" + txtFile[6:-4] + ".json", "w") as f:
         json.dump(assets, f, indent=4)
 
+
 def main():
     pdfDirectory = '.\FinancialDisclosures'
     for entry in os.listdir(pdfDirectory):
         full_path = os.path.join(pdfDirectory, entry)
         if os.path.isfile(full_path):
-            print(f"File: {full_path}")
-            convertToText(full_path)
+            if entry != '.gitignore':
+                convertToText(full_path)
     txtDirectory = './tmp'
     for entry in os.listdir(txtDirectory):
         full_path = os.path.join(txtDirectory, entry)
         if os.path.isfile(full_path):
-            print(f"File: {full_path}")
-            parseDisclosure(full_path)
+            if entry != '.gitignore':
+                parseDisclosure(full_path)
             
 
 
