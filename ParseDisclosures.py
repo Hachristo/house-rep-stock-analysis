@@ -112,10 +112,7 @@ def parseDisclosure(txtFile):
                         keyString = line[start_index + 1 : end_index]
                         if keyString.isupper():
                             if key != "":
-                                if key in assets.keys():
-                                    assets[key].append("ERROR")
-                                else:
-                                    assets[key] = ["ERROR"]
+                                assets[key] = "ERROR"
                             key = keyString
                             valueReading = True
                             keyComplete = True
@@ -131,9 +128,9 @@ def parseDisclosure(txtFile):
                     # there are occasionally multiple entries for the same stock in these disclosures, so we make a list of 
                     # values associated with each key for each distinct entry
                     if key in assets.keys():
-                        assets[key].append(value)
+                        assets[key] = addRange(assets[key], rangeToInt(value))
                     else:
-                        assets[key] = [value]
+                        assets[key] = rangeToInt(value)
                     key = ""
                     value = ""
                     keyComplete = False
@@ -144,13 +141,26 @@ def parseDisclosure(txtFile):
                 reading = True
                 keyReading = True
     file.close()
-    for key in assets.keys():
-        valueString = ""
-        for v in assets[key]:
-            valueString += v + ", "
     with open("./StockAssetsFD/" + txtFile[6:-4] + ".json", "w") as f:
         json.dump(assets, f, indent=4)
 
+def addRange(range1, range2):
+    if range1 == "ERROR":
+        return "ERROR"
+    else:
+        return (range1[0] + range2[0], range1[1] + range2[1])
+    
+
+def rangeToInt(range):
+    if range == "None" or range == "Undetermined":
+        return (0, 0)
+    else:
+        characters_to_remove = '$, '
+        translation_table = range.maketrans("", "", characters_to_remove)
+        range = range.translate(translation_table)
+        minValue = range[0:range.find('-')]
+        maxValue = range[range.find('-') + 1:]
+        return (int(minValue), int(maxValue))
 
 def main():
     pdfDirectory = '.\FinancialDisclosures'
@@ -165,6 +175,7 @@ def main():
         if os.path.isfile(full_path):
             if entry != '.gitignore':
                 parseDisclosure(full_path)
+
             
 
 
