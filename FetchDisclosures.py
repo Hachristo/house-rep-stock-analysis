@@ -6,6 +6,7 @@ DocDict = {}
 path = './FinancialDisclosures/'
 
 def main(name, district):
+    print("Fetching Financial Disclosures")
     xmls = parseXMLs()
     get_DocIDs(xmls, name, district)
     download_All(path)
@@ -71,6 +72,4 @@ def download_All(outputPath):
         fullBase = baseURL + year + '/'
         for id in DocDict[year]:
             download_pdf_from_url(fullBase + id + '.pdf', path + year + '.pdf')
-
-main("Greene", "GA14")
 

@@ -4,7 +4,9 @@ import requests
 
 USD_to_Range_Map = {
     "1001.0" : (1001, 15000),
-    "15001.0" : (15001, 50000)
+    "15001.0" : (15001, 50000),
+    "50001.0" : (50001, 100000),
+    "100001.0" : (100001, 250000)
 }
 
 def readJsonFile(path):
@@ -59,9 +61,16 @@ def pullTransactions(BGID):
     }
 
     response = requests.get('https://api.quiverquant.com/beta/bulk/congresstrading', params=params, headers=headers)
+
+    with open("./Results/" + BGID + '_trading.json', 'w') as json_file:
+        json.dump(response.json(), json_file, indent=4)
+    print("Succesfully stored Quiver transaction history in " + "./Results/" + BGID + '_trading.json')
+
     return response.json()
 
 def main(bioGuideID):
+    print("Comparing Transactions")
+    compiledResults = {}
     startingYear = int(os.listdir('.\StockAssetsFD')[1][:4])
     Quiver_Assets = pullTransactions(bioGuideID)
     allDiffs = os.listdir('./GeneratedDiffs')[1:]
@@ -72,7 +81,8 @@ def main(bioGuideID):
         FD_Assets = readJsonFile('./GeneratedDiffs/' + allDiffs[year])
         currentTransactions = filterAssetsToYear(str(startingYear + year + 1), Quiver_Assets)
         results = compare(AssetsPrev, AssetsCurr, FD_Assets, currentTransactions)
-        with open("./Results/" + str(startingYear + year) + "_" + str(startingYear + year + 1) + ".json", "w") as f:
-            json.dump(results, f, indent=4)
-
-main('G000596')
+        compiledResults[str(startingYear + year) + "-" + str(startingYear + year + 1)] = results
+        print("Succesfully Compared transactions in " + str(startingYear + year) + "-" + str(startingYear + year + 1))
+    with open("./Results/" + bioGuideID + ".json", "w") as f:
+        json.dump(compiledResults, f, indent=4)
+    print("Succesfully stored output in " + "./Results/" + bioGuideID + ".json")

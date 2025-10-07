@@ -141,6 +141,7 @@ def parseDisclosure(txtFile):
     file.close()
     with open("./StockAssetsFD/" + txtFile[6:-4] + ".json", "w") as f:
         json.dump(assets, f, indent=4)
+    print('Succesfully parsed ' + txtFile[6:10])
 
 def addRange(range1, range2):
     if range1 == "ERROR":
@@ -161,6 +162,7 @@ def rangeToInt(range):
         return (int(minValue), int(maxValue))
 
 def main():
+    print('Parsing Financial Disclosures')
     pdfDirectory = '.\FinancialDisclosures'
     for entry in os.listdir(pdfDirectory):
         full_path = os.path.join(pdfDirectory, entry)
@@ -174,14 +176,7 @@ def main():
             if entry != '.gitignore':
                 parseDisclosure(full_path)
 
-            
 
-
-# fileName = "MTG2023FD"
-# convertToText(fileName + ".pdf")
-# parseDisclosure(fileName + ".txt")
-
-main()
 
 
 
