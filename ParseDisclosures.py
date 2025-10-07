@@ -50,9 +50,6 @@ def parseDisclosure(txtFile):
                 if '\x0c' in line:
                     if line == "\x0cAsset\n":
                         spanOverride = True
-                        continue
-                    else:
-                        continue
                 # page breaks interrupt the otherwise predictable pattern of data contained within the text file, so
                 # we must ensure that we account for every edge case.
                 if spanOverride:
@@ -90,7 +87,8 @@ def parseDisclosure(txtFile):
                     # certain stocks are owned at least in part by someone other than the filer, in which case we 
                     # include that information in the key
                     if line == 'SP\n' or line == 'JT\n' or line == 'DC\n':
-                        key += ' (' + line.replace('\n', '') + ')'
+                        # key += ' (' + line.replace('\n', '') + ')'
+                        pass
                     # the value of certain stocks is marked as None or Undetermined in some cases
                     elif (line == 'None\n' or line == 'Undetermined\n') and value == "":
                         value += line.replace('\n', '')
