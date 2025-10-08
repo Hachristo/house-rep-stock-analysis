@@ -19,8 +19,8 @@ params = {
     'normalized': 'true',
     'page': '1',
     'page_size': '700',
-    'bioguide_id': 'G000596',
-    'nonstock': 'false',
+    'bioguide_id': 'M001213',
+    'nonstock': 'true',
 }
 
 response = requests.get('https://api.quiverquant.com/beta/bulk/congresstrading', params=params, headers=headers)

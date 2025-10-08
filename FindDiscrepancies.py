@@ -4,6 +4,11 @@ import FetchDisclosures
 import ParseDisclosures
 import os
 
+representatives = {
+    'G000596' : {'District' : 'GA14', 'LastName' : 'Greene'},
+    'M001213' : {'District' : 'UT01', 'LastName' : 'Moore'}
+}
+
 def clearFolder(path):
     for entry in os.listdir(path):
         if entry != '.gitignore':

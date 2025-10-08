@@ -12,6 +12,7 @@ def convertToText(pdf):
     out.close()
 
 def parseDisclosure(txtFile):
+    asset_type_codes = ['ST', 'CS', 'CT', 'FU', 'OP', 'RS', 'EF']
     assets = {}             # dictionary to contain list of assets
     reading = False         # only perform parsing checks when we are in a table
     keyReading = False      # reading mode for names of assets
@@ -68,27 +69,43 @@ def parseDisclosure(txtFile):
                     # stock abbreviations are always found between parentheses, so we only continue with lines that open
                     # a parentheses
                     if '(' in line:
-                        start_index = line.find('(')                # index of first parentheses
-                        end_index = line.find(')', start_index + 1) # index of second parentheses
-                        keyString = line[start_index + 1 : end_index]     # key is the substring between the two indexes
-                        # parentheses are occassionally used in other places, but stock abbreviations are always a 
-                        # series of uppercase characters. As long as we check to make sure our string matches that
-                        # condition, we can save it as a key and start looking for it's associated value
-                        if keyString.isupper():
-                            key = keyString
-                            valueReading = True
-                            keyComplete = True
-                            keyReading = False
-                        else:
-                            key = ""
+                        if '⇒' in line:
                             continue
+                        else:
+                            start_index = line.find('(')                # index of first parentheses
+                            end_index = line.find(')', start_index + 1) # index of second parentheses
+                            keyString = line[start_index + 1 : end_index]     # key is the substring between the two indexes
+                            # parentheses are occassionally used in other places, but stock abbreviations are always a 
+                            # series of uppercase characters. As long as we check to make sure our string matches that
+                            # condition, we can save it as a key and start looking for it's associated value
+                            if keyString.isupper():
+                                key = keyString
+                                valueReading = True
+                                keyComplete = True
+                                keyReading = False
+                            else:
+                                key = ""
+                                continue
+                            if '[' in line:
+                                start_index = line.find('[')
+                                asset_type = line[start_index + 1 : start_index + 3]
+                                if asset_type not in asset_type_codes:
+                                    key = ""
+                                    valueReading = False
+                                    keyComplete = False
+                                    keyReading = True
+                                    continue
                 # now we're looking for the value of the stock, always found after the key
                 elif valueReading:
-                    # certain stocks are owned at least in part by someone other than the filer, in which case we 
-                    # include that information in the key
-                    if line == 'SP\n' or line == 'JT\n' or line == 'DC\n':
-                        # key += ' (' + line.replace('\n', '') + ')'
-                        pass
+                    if '[' in line:
+                        start_index = line.find('[')
+                        asset_type = line[start_index + 1 : start_index + 3]
+                        if asset_type not in asset_type_codes:
+                            key = ""
+                            valueReading = False
+                            keyComplete = False
+                            keyReading = True
+                            continue
                     # the value of certain stocks is marked as None or Undetermined in some cases
                     elif (line == 'None\n' or line == 'Undetermined\n') and value == "":
                         value += line.replace('\n', '')
@@ -105,6 +122,8 @@ def parseDisclosure(txtFile):
                         else:
                             value += ' '
                     elif "(" in line:
+                        if '⇒' in line:
+                            continue
                         start_index = line.find('(')
                         end_index = line.find(')', start_index + 1)
                         keyString = line[start_index + 1 : end_index]
@@ -129,6 +148,7 @@ def parseDisclosure(txtFile):
                         assets[key] = addRange(assets[key], rangeToInt(value))
                     else:
                         assets[key] = rangeToInt(value)
+                    if key == 'BM': print(key + ' : ' + value)
                     key = ""
                     value = ""
                     keyComplete = False
