@@ -2,7 +2,7 @@ import json
 import os
 
 def main():
-    print('Creating Difference Files')
+    # print('Creating Difference Files')
     assets = readJsonFiles()
     generateDiffs(assets)
 
@@ -58,5 +58,5 @@ def generateDiffs(allAssets):
         difference = generateDiff(allAssets[year], allAssets[year + 1])
         with open("./GeneratedDiffs/" + str(startingYear + year) + "_" + str(startingYear + year + 1) + ".json", "w") as f:
             json.dump(difference, f, indent=4)
-        print("Succesfully generated difference file for " + str(startingYear + year) + "_" + str(startingYear + year + 1))
+        # print("Succesfully generated difference file for " + str(startingYear + year) + "_" + str(startingYear + year + 1))
         

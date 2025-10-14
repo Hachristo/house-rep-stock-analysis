@@ -2,14 +2,14 @@ import requests
 import xml.etree.ElementTree as ET
 import os
 
-DocDict = {}
 path = './FinancialDisclosures/'
 
 def main(name, district):
-    print("Fetching Financial Disclosures")
+    # print("Fetching Financial Disclosures")
     xmls = parseXMLs()
-    get_DocIDs(xmls, name, district)
-    download_All(path)
+    docIDs = get_DocIDs(xmls, name, district)
+    # print(docIDs)
+    download_All(docIDs, path)
 
 # Parse the XML fileS
 def parseXMLs():
@@ -35,6 +35,7 @@ def parseXMLs():
     
 
 def get_DocIDs(_xmls, _name, _district):
+    DocDict = {}
     for root in _xmls:
         DocIDs = []
         year = root[0].find('Year').text
@@ -45,6 +46,7 @@ def get_DocIDs(_xmls, _name, _district):
                     DocIDs.append(child.find('DocID').text)
         if len(DocIDs) > 0:
             DocDict[year] = DocIDs
+    return DocDict
 
 def download_pdf_from_url(pdf_url, local_filename):
     """
@@ -61,15 +63,15 @@ def download_pdf_from_url(pdf_url, local_filename):
         with open(local_filename, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
-        print(f"PDF downloaded successfully to {local_filename}")
+        # print(f"PDF downloaded successfully to {local_filename}")
 
     except requests.exceptions.RequestException as e:
         print(f"Error downloading PDF: {e}")
 
-def download_All(outputPath):
+def download_All(dict, outputPath):
     baseURL = 'https://disclosures-clerk.house.gov/public_disc/financial-pdfs/'
-    for year in DocDict.keys():
+    for year in dict.keys():
         fullBase = baseURL + year + '/'
-        for id in DocDict[year]:
+        for id in dict[year]:
             download_pdf_from_url(fullBase + id + '.pdf', path + year + '.pdf')
 

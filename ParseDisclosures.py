@@ -72,13 +72,15 @@ def parseDisclosure(txtFile):
                         if '⇒' in line:
                             continue
                         else:
-                            start_index = line.find('(')                # index of first parentheses
-                            end_index = line.find(')', start_index + 1) # index of second parentheses
-                            keyString = line[start_index + 1 : end_index]     # key is the substring between the two indexes
+                            start_index = line.find('(')                    # index of first parentheses
+                            end_index = line.find(')', start_index + 1)     # index of second parentheses
+                            if end_index == -1:
+                                end_index = line.find(' ', start_index + 1) # index of space after first paren, in case they forgot to close
+                            keyString = line[start_index + 1 : end_index]   # key is the substring between the two indexes
                             # parentheses are occassionally used in other places, but stock abbreviations are always a 
                             # series of uppercase characters. As long as we check to make sure our string matches that
                             # condition, we can save it as a key and start looking for it's associated value
-                            if keyString.isupper():
+                            if keyString.isupper() and keyString.find(' ') == -1:
                                 key = keyString
                                 valueReading = True
                                 keyComplete = True
@@ -113,14 +115,20 @@ def parseDisclosure(txtFile):
                         valueReading = False
                     # otherwise, we are looking for the first instance of a '$' to indicate the presence of a value range
                     elif "$" in line:
-                        value += line.replace('\n', '')
+                        if value == '':
+                            value += line.replace('\n', '')
+                            if line.count('$') == 2:
+                                valueComplete = True
+                                valueReading = False
+                            else:
+                                value += ' '
                         # oftentimes value ranges are split across two lines. If so, we continue value reading into the next line
                         # and save both lines as part of the value range
-                        if '-' not in line or line.count('$') == 2:
-                            valueComplete = True
-                            valueReading = False
                         else:
-                            value += ' '
+                            if '-' not in line:
+                                value += line.replace('\n', '')
+                                valueComplete = True
+                                valueReading = False
                     elif "(" in line:
                         if '⇒' in line:
                             continue
@@ -148,7 +156,6 @@ def parseDisclosure(txtFile):
                         assets[key] = addRange(assets[key], rangeToInt(value))
                     else:
                         assets[key] = rangeToInt(value)
-                    if key == 'BM': print(key + ' : ' + value)
                     key = ""
                     value = ""
                     keyComplete = False
@@ -161,7 +168,7 @@ def parseDisclosure(txtFile):
     file.close()
     with open("./StockAssetsFD/" + txtFile[6:-4] + ".json", "w") as f:
         json.dump(assets, f, indent=4)
-    print('Succesfully parsed ' + txtFile[6:10])
+    # print('Succesfully parsed ' + txtFile[6:10])
 
 def addRange(range1, range2):
     if range1 == "ERROR":
@@ -182,7 +189,7 @@ def rangeToInt(range):
         return (int(minValue), int(maxValue))
 
 def main():
-    print('Parsing Financial Disclosures')
+    # print('Parsing Financial Disclosures')
     pdfDirectory = '.\FinancialDisclosures'
     for entry in os.listdir(pdfDirectory):
         full_path = os.path.join(pdfDirectory, entry)
