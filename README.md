@@ -9,6 +9,7 @@ Clone this repo and download [python](https://www.python.org/downloads/).
 Use of this project is restricted to members of VR Research and approved clients. Upon being granted authorization, you'll be provided with two JSON files, 'Project_Arguments.json' and 'Representatives.json'. 
 
 **Project_Arguments.json**
+
 This file contains three values, 'RepFilePath', 'UseSafeMode', and 'QuiverAPIToken'.
 
 RepFilePath: Replace the value in quotes with the path to 'Representatives.json'.
@@ -18,6 +19,7 @@ UseSafeMode: Leave this value as true unless you are a developer and want to see
 QuiverAPIToken: Enter your Quiver API token, preceded by 'Bearer '.
 
 **Representatives.json**
+
 This file contains a list of the representatives you'd like the program to run on. Each representative is entered as a JSON object with the following schema:
 `{
         "BioguideID": string,
@@ -47,7 +49,9 @@ LastName: Last name of the member as filed in the [Office of the Clerk](https://
 District: State and district number of the member as filed in the [Office of the Clerk](https://disclosures-clerk.house.gov/). State is written as the two letter state abbreviation followed by the two digit district number, with no spaces. For example, California district 07 would be written as 'CA07'.
 
 **Running the program**
+
 Once you've included these files, run the program from Command Prompt (Windows) or Terminal (Mac) by typing "python FindDiscrepancies.py" and pressing enter. Progress will be displaying in the command line, and output will be saved in the 'Results' folder as a JSON file named after the representative's BioguideID. The transactions pulled from Quiver will also be saved as a JSON file named as the BioguideID followed by '_trading'.
 
 **API Throttling**
+
 Quiver API monitors and limits the number of API calls made within a certain time frame, meaning that program flow will be halted occasionally by API throttling if the program makes too many API calls too quickly. A time buffer has been built in to reduce this, but in case throttling does occur, an exception has been written which will halt program execution. When this happens, simply wait for a few minutes and run the program again. Progress in analysing the list of representatives included in the 'Representatives.json' will be saved, and will continue with members whose "Completed" value is false.
