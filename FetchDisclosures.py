@@ -1,17 +1,17 @@
 import requests
 import xml.etree.ElementTree as ET
 import os
+import sys
 
 path = './FinancialDisclosures/'
 
-def main(name, district):
-    # print("Fetching Financial Disclosures")
+def main(name, district, _fdids):
     xmls = parseXMLs()
     docIDs = get_DocIDs(xmls, name, district)
-    # print(docIDs)
     download_All(docIDs, path)
+    _fdids.update(docIDs)
 
-# Parse the XML fileS
+# Parse the XML files in FDKeys
 def parseXMLs():
     parsedXMLs = []
     xmlDirectory = '.\FDKeys'
@@ -26,14 +26,13 @@ def parseXMLs():
                     parsedXMLs.append(root)
                 except FileNotFoundError:
                     print("Error: '" + full_path + "' not found.")
-                    exit()
+                    sys.exit(1)
                 except ET.ParseError as e:
                     print(f"Error parsing XML: {e}")
-                    exit()
+                    sys.exit(2)
     return parsedXMLs
     
-    
-
+# find FDs for representative in FDKeys
 def get_DocIDs(_xmls, _name, _district):
     DocDict = {}
     for root in _xmls:
@@ -42,12 +41,16 @@ def get_DocIDs(_xmls, _name, _district):
         for child in root:
             filingType = child.find('FilingType')
             if filingType.text == 'O' or filingType.text == 'H':
-                if child.find('Last').text == _name and child.find('StateDst').text == _district:
+                if _name in child.find('Last').text and child.find('StateDst').text == _district:
                     DocIDs.append(child.find('DocID').text)
         if len(DocIDs) > 0:
             DocDict[year] = DocIDs
+        else:
+            print("Error: " + year + " FD not found")
+            sys.exit(3)
     return DocDict
 
+# request FD from clerk office and download into FinancialDisclosures folder
 def download_pdf_from_url(pdf_url, local_filename):
     """
     Downloads a PDF file from a given URL and saves it locally.
@@ -67,11 +70,20 @@ def download_pdf_from_url(pdf_url, local_filename):
 
     except requests.exceptions.RequestException as e:
         print(f"Error downloading PDF: {e}")
+        sys.exit(4)
 
-def download_All(dict, outputPath):
+# request all FDs for rep
+def download_All(dict):
     baseURL = 'https://disclosures-clerk.house.gov/public_disc/financial-pdfs/'
+    prev_year = list(dict.keys())[0]
     for year in dict.keys():
-        fullBase = baseURL + year + '/'
-        for id in dict[year]:
-            download_pdf_from_url(fullBase + id + '.pdf', path + year + '.pdf')
+        # ensure that FDs found are all consecutive, if we are missing a year then the program won't work
+        if prev_year == year or int(year) - int(prev_year) == 1:
+            prev_year = year
+            fullBase = baseURL + year + '/'
+            for id in dict[year]:
+                download_pdf_from_url(fullBase + id + '.pdf', path + year + '.pdf')
+        else:
+            print("Error: missing FD(s) between" + prev_year + " and " + year)
+            sys.exit(5)
 

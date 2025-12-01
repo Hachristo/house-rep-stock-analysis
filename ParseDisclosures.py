@@ -2,6 +2,7 @@ import json
 import pymupdf
 import os
 
+# convert a pdf to a text file
 def convertToText(pdf):
     doc = pymupdf.open(pdf) # open a document
     out = open("./tmp/" + pdf[23:-4] + ".txt", "wb") # create a text output
@@ -11,8 +12,9 @@ def convertToText(pdf):
         out.write(bytes((12,))) # write page delimiter (form feed 0x0C)
     out.close()
 
+# parse text file of FD into a dictionary containing all stock assets and values
 def parseDisclosure(txtFile):
-    asset_type_codes = ['ST', 'CS', 'CT', 'FU', 'OP', 'RS', 'EF']
+    asset_type_codes = ['ST', 'CS', 'CT', 'FU', 'OP', 'RS', 'EF']   # types of relevant assets
     assets = {}             # dictionary to contain list of assets
     reading = False         # only perform parsing checks when we are in a table
     keyReading = False      # reading mode for names of assets
@@ -32,7 +34,8 @@ def parseDisclosure(txtFile):
             if '*' in line:
                 reading = False
                 break
-            # we are currently parsing through a table
+            # new filers have slightly altered formatting, using 'Year\n' as the header for the rightmost column
+            # rather than '$1,000?\n'. This is checked before we parse the table in the following blocks
             if line.casefold() == "Filing Type:\n".casefold():
                 yearReading = True
                 continue
@@ -42,6 +45,7 @@ def parseDisclosure(txtFile):
                 else:
                     headerEnd = "$1,000?\n"
                 yearReading = False
+            # we are currently parsing through a table
             if reading:
                 # first page contains a line that starts with "Filing ID #[0-9]*", we don't want to parse this line
                 if 'Filing ID' in line:
@@ -69,6 +73,7 @@ def parseDisclosure(txtFile):
                     # stock abbreviations are always found between parentheses, so we only continue with lines that open
                     # a parentheses
                     if '(' in line:
+                        # filers use this character to add notes to entries, we don't want anything from these notes
                         if '⇒' in line:
                             continue
                         else:
@@ -88,6 +93,8 @@ def parseDisclosure(txtFile):
                             else:
                                 key = ""
                                 continue
+                            # we perform an additional check to filter out assets that are not in our list of relevant types.
+                            # not all filers include these type abbreviations, so it's not perfect, but this works for most filers.
                             if '[' in line:
                                 start_index = line.find('[')
                                 asset_type = line[start_index + 1 : start_index + 3]
@@ -129,6 +136,8 @@ def parseDisclosure(txtFile):
                                 value += line.replace('\n', '')
                                 valueComplete = True
                                 valueReading = False
+                    # if we find another stock abbreviation while looking for a value, we know we've missed a value. We don't 
+                    # know what that value is, and we indicate that by filling the value as 'ERROR', and moving on with the next.
                     elif "(" in line:
                         if '⇒' in line:
                             continue
@@ -170,13 +179,14 @@ def parseDisclosure(txtFile):
         json.dump(assets, f, indent=4)
     # print('Succesfully parsed ' + txtFile[6:10])
 
+# add two value ranges (tuples containing upper and lower bound) together
 def addRange(range1, range2):
     if range1 == "ERROR":
         return "ERROR"
     else:
-        return (range1[0] + range2[0], range1[1] + range2[1])
-    
+        return (range1[0] + range2[0], range1[1] + range2[1]) 
 
+# convert a string representing a range of value into a tuple containing the lower and upper bounds as ints
 def rangeToInt(range):
     if range == "None" or range == "Undetermined":
         return (0, 0)
@@ -186,10 +196,12 @@ def rangeToInt(range):
         range = range.translate(translation_table)
         minValue = range[0:range.find('-')]
         maxValue = range[range.find('-') + 1:]
-        return (int(minValue), int(maxValue))
+        try:
+            return (int(minValue), int(maxValue))
+        except:
+            return (0, 0)
 
 def main():
-    # print('Parsing Financial Disclosures')
     pdfDirectory = '.\FinancialDisclosures'
     for entry in os.listdir(pdfDirectory):
         full_path = os.path.join(pdfDirectory, entry)
