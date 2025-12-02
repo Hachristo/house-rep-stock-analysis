@@ -5,17 +5,19 @@ import sys
 
 path = './FinancialDisclosures/'
 
-def main(name, district, _fdids):
-    xmls = parseXMLs()
-    docIDs = get_DocIDs(xmls, name, district)
-    download_All(docIDs, path)
+def main(rep, _fdids):
+    xmls = parseXMLs(rep['ClerkOffice'][0]['YearRange'][0], rep['ClerkOffice'][-1]['YearRange'][1])
+    docIDs = get_DocIDs(xmls, rep)
+    download_All(docIDs)
     _fdids.update(docIDs)
 
 # Parse the XML files in FDKeys
-def parseXMLs():
+def parseXMLs(start, end):
     parsedXMLs = []
     xmlDirectory = '.\FDKeys'
-    for entry in os.listdir(xmlDirectory):
+    XMLs = os.listdir(xmlDirectory)
+    for i in range(start - 2008, end - 2008 + 1):
+        entry = XMLs[i]
         full_path = os.path.join(xmlDirectory, entry)
         if os.path.isfile(full_path):
             if entry != '.gitignore':
@@ -33,11 +35,18 @@ def parseXMLs():
     return parsedXMLs
     
 # find FDs for representative in FDKeys
-def get_DocIDs(_xmls, _name, _district):
+def get_DocIDs(_xmls, rep):
     DocDict = {}
     for root in _xmls:
         DocIDs = []
         year = root[0].find('Year').text
+        _name = ''
+        _district = ''
+        for term in rep['ClerkOffice']:
+            if int(year) >= term['YearRange'][0] and int(year) <= term['YearRange'][1]:
+                _name = term['LastName']
+                _district = term['District']
+                break
         for child in root:
             filingType = child.find('FilingType')
             if filingType.text == 'O' or filingType.text == 'H':
@@ -45,9 +54,6 @@ def get_DocIDs(_xmls, _name, _district):
                     DocIDs.append(child.find('DocID').text)
         if len(DocIDs) > 0:
             DocDict[year] = DocIDs
-        else:
-            print("Error: " + year + " FD not found")
-            sys.exit(3)
     return DocDict
 
 # request FD from clerk office and download into FinancialDisclosures folder
@@ -70,7 +76,7 @@ def download_pdf_from_url(pdf_url, local_filename):
 
     except requests.exceptions.RequestException as e:
         print(f"Error downloading PDF: {e}")
-        sys.exit(4)
+        sys.exit(3)
 
 # request all FDs for rep
 def download_All(dict):
@@ -84,6 +90,6 @@ def download_All(dict):
             for id in dict[year]:
                 download_pdf_from_url(fullBase + id + '.pdf', path + year + '.pdf')
         else:
-            print("Error: missing FD(s) between" + prev_year + " and " + year)
-            sys.exit(5)
+            print("Error: missing FD(s) between " + prev_year + " and " + year)
+            sys.exit(4)
 

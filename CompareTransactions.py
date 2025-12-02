@@ -51,7 +51,7 @@ def compare(parsePrev, parseCurr, parseResults, apiResults, allQuiver, year, fds
     FD_URL = 'https://disclosures-clerk.house.gov/public_disc/financial-pdfs/'
     discrepancies = {}
     # we need to parse FD keys to find links to PTRS in certain discrepancies
-    xmls = FetchDisclosures.parseXMLs()
+    xmls = FetchDisclosures.parseXMLs(2008, 2024)
     # keys in FD that are not in Quiver Data
     parseDiscrepancies = set(parseResults.keys()) - set(apiResults.keys())
     # keys in Quiver Data that are not in FD
@@ -193,15 +193,16 @@ def pullTransactions(BGID, api_token, _lastName, _district, _refresh_api):
         }
 
         response = requests.get('https://api.quiverquant.com/beta/bulk/congresstrading', params=params, headers=headers)
-        if 'details' in response.keys():
+        response = response.json()
+        if not isinstance(response, list):
             print('Error: API throttle')
-            sys.exit(6)
+            sys.exit(5)
         else:
             with open(filepath, 'w') as json_file:
-                json.dump(response.json(), json_file, indent=4)
+                json.dump(response, json_file, indent=4)
             # print("Succesfully stored Quiver transaction history in " + "./Results/" + BGID + '_trading.json')
 
-            return response.json()
+            return response
 
 def main(rep, APItoken, FD_IDs, refresh_api):
     bioGuideID = rep['BioguideID']
@@ -228,3 +229,11 @@ def main(rep, APItoken, FD_IDs, refresh_api):
         compiledResults[str(startingYear + year) + "-" + str(startingYear + year + 1)] = results
     with open("./Results/" + lastName + district + ".json", "w") as f:
         json.dump(compiledResults, f, indent=4)
+
+'''
+pullTransactions("S001190",
+                 "Bearer 2143a235f7c66c48bcc95166d61147310ac4fa7f",
+                 "Schneider",
+                 "IL10",
+                 True)
+'''

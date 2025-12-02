@@ -6,7 +6,7 @@ import StoreOutput
 import os
 import time
 import json
-from datetime import datetime
+from datetime import date
 
 # delete all files in a folder at path, excluding gitignore
 def clearFolder(path):
@@ -26,8 +26,7 @@ def clearDataFolders():
 def singleRunDict(representative, token, _refresh):
     FD_IDs = {}
     clearDataFolders()
-    for term in representative['ClerkOffice']:
-        FetchDisclosures.main(term['LastName'], term['District'], FD_IDs)
+    FetchDisclosures.main(representative, FD_IDs)
     ParseDisclosures.main()
     DifferentialTransactions.main()
     CompareTransactions.main(representative, token, FD_IDs, _refresh)
@@ -52,9 +51,9 @@ def LIST_RUN(path, QuiverToken, refresh):
                 else:
                     print(rep['BioguideID'] + " Completed")
         print('All representatives have been processed')
-        current_datetime = datetime.now()
-        datetime_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        StoreOutput.main(datetime_string)
+        current_date = date.today()
+        current_date = current_date.strftime("%Y-%m-%d")
+        StoreOutput.main(current_date)
         with open(path, "w") as f:
             json.dump(representatives, f, indent=4)
     except SystemExit as e:
