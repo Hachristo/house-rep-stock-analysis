@@ -62,7 +62,10 @@ def LIST_RUN(path, QuiverToken, refresh):
             json.dump(representatives, f, indent=4)
 
 def main():
-    arguments = readJsonFile('./Project_Arguments.json')
+    try:
+        arguments = readJsonFile('./Project_Arguments.json')
+    except json.JSONDecodeError:
+        print('Input Error: \'./Project_Arguments.json\' could not be decoded')
     LIST_RUN(arguments['RepFilePath'],
              arguments['QuiverAPIToken'],
              arguments['RefreshAPI'])

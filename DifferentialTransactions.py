@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 def main():
     assets = readJsonFiles()
@@ -38,7 +39,11 @@ def generateDiff(previous, current):
 # find the differences in FDs throughout the rep's term, outputting each difference as a json
 # file in the GeneratedDiffs folder
 def generateDiffs(allAssets):
-    startingYear = int(os.listdir('.\StockAssetsFD')[1][:4])
+    try:
+        startingYear = int(os.listdir('.\StockAssetsFD')[1][:4])
+    except ValueError:
+        print("Difference Error: " + os.listdir('.\StockAssetsFD')[1][:4] + " is not a valid year")
+        sys.exit(8)
     for year in range(len(allAssets) - 1):
         difference = generateDiff(allAssets[year], allAssets[year + 1])
         with open("./GeneratedDiffs/" + str(startingYear + year) + "_" + str(startingYear + year + 1) + ".json", "w") as f:

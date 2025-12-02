@@ -195,7 +195,7 @@ def pullTransactions(BGID, api_token, _lastName, _district, _refresh_api):
         response = requests.get('https://api.quiverquant.com/beta/bulk/congresstrading', params=params, headers=headers)
         response = response.json()
         if not isinstance(response, list):
-            print('Error: API throttle')
+            print('Quiver Error: API throttle')
             sys.exit(5)
         else:
             with open(filepath, 'w') as json_file:
@@ -214,9 +214,13 @@ def main(rep, APItoken, FD_IDs, refresh_api):
     allDiffs = os.listdir('./GeneratedDiffs')[1:]
     allAssets = os.listdir('./StockAssetsFD')[1:]
     for year in range(len(allDiffs)):
-        AssetsPrev = readJsonFile('./StockAssetsFD/' + allAssets[year])
-        AssetsCurr = readJsonFile('./StockAssetsFD/' + allAssets[year + 1])
-        FD_Assets = readJsonFile('./GeneratedDiffs/' + allDiffs[year])
+        try:
+            AssetsPrev = readJsonFile('./StockAssetsFD/' + allAssets[year])
+            AssetsCurr = readJsonFile('./StockAssetsFD/' + allAssets[year + 1])
+            FD_Assets = readJsonFile('./GeneratedDiffs/' + allDiffs[year])
+        except FileNotFoundError as f:
+            print('Compare Error: ' + f)
+            sys.exit(9)
         currentTransactions = filterAssetsToYear(str(startingYear + year + 1), Quiver_Assets)
         results = compare(AssetsPrev,
                           AssetsCurr,

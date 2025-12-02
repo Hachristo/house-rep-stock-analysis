@@ -1,10 +1,15 @@
 import json
 import pymupdf
 import os
+import sys
 
 # convert a pdf to a text file
 def convertToText(pdf):
-    doc = pymupdf.open(pdf) # open a document
+    try:
+        doc = pymupdf.open(pdf) # open a document
+    except pymupdf.FileDataError:
+        print('Parse Error: \'' + pdf + '\' is an invalid file format')
+        sys.exit(7)
     out = open("./tmp/" + pdf[23:-4] + ".txt", "wb") # create a text output
     for page in doc: # iterate the document pages
         text = page.get_text().encode("utf8") # get plain text (is in UTF-8)
@@ -177,7 +182,6 @@ def parseDisclosure(txtFile):
     file.close()
     with open("./StockAssetsFD/" + txtFile[6:-4] + ".json", "w") as f:
         json.dump(assets, f, indent=4)
-    # print('Succesfully parsed ' + txtFile[6:10])
 
 # add two value ranges (tuples containing upper and lower bound) together
 def addRange(range1, range2):

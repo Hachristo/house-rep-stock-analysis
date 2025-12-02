@@ -27,10 +27,10 @@ def parseXMLs(start, end):
                     root = tree.getroot()
                     parsedXMLs.append(root)
                 except FileNotFoundError:
-                    print("Error: '" + full_path + "' not found.")
+                    print("Fetch Error: '" + full_path + "' not found.")
                     sys.exit(1)
                 except ET.ParseError as e:
-                    print(f"Error parsing XML: {e}")
+                    print(f"Fetch Error parsing XML: {e}")
                     sys.exit(2)
     return parsedXMLs
     
@@ -47,13 +47,15 @@ def get_DocIDs(_xmls, rep):
                 _name = term['LastName']
                 _district = term['District']
                 break
+        if _name == '' or _district == '':
+            print('Fetch Error: missing Clerk Office data in ' + year)
+            sys.exit(6)
         for child in root:
             filingType = child.find('FilingType')
             if filingType.text == 'O' or filingType.text == 'H':
                 if _name in child.find('Last').text and child.find('StateDst').text == _district:
                     DocIDs.append(child.find('DocID').text)
-        if len(DocIDs) > 0:
-            DocDict[year] = DocIDs
+        DocDict[year] = DocIDs
     return DocDict
 
 # request FD from clerk office and download into FinancialDisclosures folder
@@ -75,7 +77,7 @@ def download_pdf_from_url(pdf_url, local_filename):
         # print(f"PDF downloaded successfully to {local_filename}")
 
     except requests.exceptions.RequestException as e:
-        print(f"Error downloading PDF: {e}")
+        print(f"Fetch Error: failed to download PDF: {e}")
         sys.exit(3)
 
 # request all FDs for rep
@@ -90,6 +92,6 @@ def download_All(dict):
             for id in dict[year]:
                 download_pdf_from_url(fullBase + id + '.pdf', path + year + '.pdf')
         else:
-            print("Error: missing FD(s) between " + prev_year + " and " + year)
+            print("Fetch Error: missing FD(s) between " + prev_year + " and " + year)
             sys.exit(4)
 

@@ -4,6 +4,7 @@ from openpyxl.styles import Alignment
 from openpyxl.styles import Color
 import json
 import os
+import sys
 
 # read json file at path and output as dictionary
 def readJsonFile(path):
@@ -90,7 +91,11 @@ def main(name):
     for entry in os.listdir('./Results'):
         if entry != '.gitignore' and 'trading' not in entry:
             fullpath = os.path.join('./Results', entry)
-            js = readJsonFile(fullpath)
+            try:
+                js = readJsonFile(fullpath)
+            except json.JSONDecodeError:
+                print(f"Output Error: \'" + fullpath + "\' could not be decoded")
+                sys.exit(10)
             index = entry.find('_')
             ws = wb.create_sheet(entry[:index])
             ws.append(['Stock',
