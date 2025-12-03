@@ -51,7 +51,7 @@ def compare(parsePrev, parseCurr, parseResults, apiResults, allQuiver, year, fds
     FD_URL = 'https://disclosures-clerk.house.gov/public_disc/financial-pdfs/'
     discrepancies = {}
     # we need to parse FD keys to find links to PTRS in certain discrepancies
-    xmls = FetchDisclosures.parseXMLs(2008, 2024)
+    xmls = FetchDisclosures.parseXMLs(2008, 2025)
     # keys in FD that are not in Quiver Data
     parseDiscrepancies = set(parseResults.keys()) - set(apiResults.keys())
     # keys in Quiver Data that are not in FD

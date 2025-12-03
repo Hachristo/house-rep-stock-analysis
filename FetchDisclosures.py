@@ -55,6 +55,7 @@ def get_DocIDs(_xmls, rep):
             if filingType.text == 'O' or filingType.text == 'H':
                 if _name in child.find('Last').text and child.find('StateDst').text == _district:
                     DocIDs.append(child.find('DocID').text)
+                    break
         DocDict[year] = DocIDs
     return DocDict
 

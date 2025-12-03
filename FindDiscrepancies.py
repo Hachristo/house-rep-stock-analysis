@@ -54,10 +54,9 @@ def LIST_RUN(path, QuiverToken, refresh):
         current_date = date.today()
         current_date = current_date.strftime("%Y-%m-%d")
         StoreOutput.main(current_date)
-        with open(path, "w") as f:
-            json.dump(representatives, f, indent=4)
     except SystemExit as e:
         print(f"Exiting with error: {e}")
+    finally:
         with open(path, "w") as f:
             json.dump(representatives, f, indent=4)
 
