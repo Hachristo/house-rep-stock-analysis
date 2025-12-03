@@ -3,6 +3,7 @@ import DifferentialTransactions
 import FetchDisclosures
 import ParseDisclosures
 import StoreOutput
+import ReadInput
 import os
 import time
 import json
@@ -39,7 +40,7 @@ def readJsonFile(path):
 # run program on all representatives found in json file at path
 def LIST_RUN(path, QuiverToken, refresh):
     try:
-        representatives = readJsonFile(path)
+        representatives = ReadInput.Read(path)
         for rep in representatives:
             if rep['Completed'] == False:
                 print("Running " + rep['BioguideID'])
@@ -57,8 +58,7 @@ def LIST_RUN(path, QuiverToken, refresh):
     except SystemExit as e:
         print(f"Exiting with error: {e}")
     finally:
-        with open(path, "w") as f:
-            json.dump(representatives, f, indent=4)
+        ReadInput.Update(representatives, path)
 
 def main():
     try:
