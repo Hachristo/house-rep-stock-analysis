@@ -6,7 +6,7 @@ The purpose of this project is to assist in analysis of annual financial disclos
 ## Usage
 Clone this repo and download [python](https://www.python.org/downloads/).
 
-Use of this project is restricted to members of VR Research and approved clients. Upon being granted authorization, you'll be provided with a JSON file and an XLSX, 'Project_Arguments.json' and 'Representatives.xlsx'. 
+Use of this project is restricted to members of VR Research and approved clients. Upon being granted authorization, you'll be provided with a JSON file and an XLSX file, 'Project_Arguments.json' and 'Representatives.xlsx'. 
 
 **Project_Arguments.json**
 
