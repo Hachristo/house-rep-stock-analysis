@@ -6,45 +6,31 @@ The purpose of this project is to assist in analysis of annual financial disclos
 ## Usage
 Clone this repo and download [python](https://www.python.org/downloads/).
 
-Use of this project is restricted to members of VR Research and approved clients. Upon being granted authorization, you'll be provided with two JSON files, 'Project_Arguments.json' and 'Representatives.json'. 
+Use of this project is restricted to members of VR Research and approved clients. Upon being granted authorization, you'll be provided with a JSON file and an XLSX, 'Project_Arguments.json' and 'Representatives.xlsx'. 
 
 **Project_Arguments.json**
 
 This file contains three values, 'RepFilePath', 'RefreshAPI', and 'QuiverAPIToken'.
 
-RepFilePath: Replace the value in quotes with the path to 'Representatives.json'.
+RepFilePath: Replace the value in quotes with the path to 'Representatives.xlsx'.
 
 RefreshAPI: Set to true if you want the project to refresh data pulled from [Quiver](https://api.quiverquant.com/docs/). Otherwise, set to false to use previously pulled data. Using previously pulled data avoids potential API throttling, and reduces runtime.
 
 QuiverAPIToken: Enter your Quiver API token, preceded by 'Bearer '.
 
-**Representatives.json**
+**Representatives.xlsx**
 
-This file contains a list of the representatives you'd like the program to run on. Each representative is entered as a JSON object with the following schema:
-```
-{  
-    "BioguideID": string,  
-    "Completed": boolean,
-    "ClerkOffice": [
-        {
-            "YearRange": [
-                int,
-                int
-            ],
-            "LastName": string,
-            "District": string
-        }
-    ]
-}
-```
+This excel sheet contains a list of the representatives you'd like the program to run on. Each representative is entered as a row with the following information in each column:
 
 BioguideID: Unique identifier for House members, used to pull data from Quiver. BioguideIDs can be found [here](https://www.congress.gov/help/field-values/member-bioguide-ids).
 
 Completed: Flag for tracking whether member has already been analysed by the program, automatically updated after program completion.
 
-ClerkOffice: List of terms served by the House member. Occasionally house members change their last name or district when filing, which can be accommodated for here by entering multiple terms in this list.
+Term 1, Term 2, Term 3: List of terms served by the House member. Occasionally house members change their last name or district when filing, which can be accommodated for here by entering multiple terms.
 
-YearRange: List containing the first and last year the member filed with the last name and district included below.
+Starting Year: The first year the member filed with the last name and district included in the indicated term.
+
+Ending Year: The last year the member filed with the last name and district included in the indicated term.
 
 LastName: Last name of the member as filed in the [Office of the Clerk](https://disclosures-clerk.house.gov/).
 
@@ -52,7 +38,7 @@ District: State and district number of the member as filed in the [Office of the
 
 **Running the program**
 
-Once you've included these files, run the program from Command Prompt (Windows) or Terminal (Mac) by typing "python FindDiscrepancies.py" and pressing enter. Progress will be displaying in the command line, and output for individuals will be saved in the 'Results' folder as a JSON file named after the representative's last name and district. The transactions pulled from Quiver will also be saved as a JSON file named as the last name and district followed by '_trading'. Upon completion of all representatives included in Representatives.json, an XLSX version of all results will be saved in the 'Sheets' folder as the current date and time.
+Once you've included these files, run the program from Command Prompt (Windows) or Terminal (Mac) by typing "python FindDiscrepancies.py" and pressing enter. Progress will be displaying in the command line, and output for individuals will be saved in the 'Results' folder as a JSON file named after the representative's last name and district. The transactions pulled from Quiver will also be saved as a JSON file named as the last name and district followed by '_trading'. Upon completion of all representatives included in Representatives.json, an XLSX version of all results will be saved in the 'Sheets' folder as the current date.
 
 **API Throttling**
 
